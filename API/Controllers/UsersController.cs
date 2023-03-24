@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Data;
 using API.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,7 @@ namespace API.Controllers
 {
     // [ApiController]
     // [Route("api/[controller]")]   //api/users
+    [Authorize]
     public class UsersController : BaseAPIController  //since baseapiController has [ApiController] attribute
                                                       //we dont need to apply that here (same for [route])
     {
@@ -23,6 +25,7 @@ namespace API.Controllers
             
         }
 
+        [AllowAnonymous] //dont use this at controller level, cuz then you cant override it at api endpoint level and use authorize there
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AppUser>>> GetUsers() //ActionResult gives us the ability to return http responses (200 OK, bat request, etc)
         {
