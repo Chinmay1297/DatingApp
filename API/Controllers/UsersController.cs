@@ -9,9 +9,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]   //api/users
-    public class UsersController : ControllerBase
+    // [ApiController]
+    // [Route("api/[controller]")]   //api/users
+    public class UsersController : BaseAPIController  //since baseapiController has [ApiController] attribute
+                                                      //we dont need to apply that here (same for [route])
     {
        
         private readonly DataContext _context;

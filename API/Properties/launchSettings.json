@@ -10,7 +10,8 @@
   },
   "profiles": {
     
-    "myprofile": {
+    "api": {
+      "hotReloadEnabled": false,
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
