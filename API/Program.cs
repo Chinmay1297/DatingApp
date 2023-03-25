@@ -1,10 +1,4 @@
-using System.Text;
-using API.Data;
-using API.Interfaces;
-using API.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using API.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,33 +6,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddCors();
+builder.Services.AddApplicationServices(builder.Configuration);                //using our ApplicationServicesExtension class where we've added all the services
 
-builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddIdentityServices(builder.Configuration);                   //Similarly IdentityServiceExtension class's function is used here
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options=>{
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,                                                //tells the server to validate token just based on issuer signing key
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["TokenKey"])),
-            ValidateIssuer = false,
-            ValidateAudience = false
-        };
-    });
-
-builder.Services.AddDbContext<DataContext>(opt => 
-{
-    opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.UseCors(builder => builder.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200"));
 
-app.UseAuthentication();   //sequence matters here! it comes after CORS and before Mapcontrollers
-app.UseAuthorization();
+//sequence matters here! it comes after CORS and before Mapcontrollers   --- authentication 1st, authorization 2nd
+app.UseAuthentication();   //asks does the request has a valid token
+app.UseAuthorization();    //if yes what are you allowed to do
 
-app.MapControllers();              //Middleware
+app.MapControllers();              //Middlewares
 
 app.Run();
