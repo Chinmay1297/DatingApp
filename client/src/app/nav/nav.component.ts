@@ -35,7 +35,6 @@ export class NavComponent implements OnInit {
   {
     this.accountService.login(this.model).subscribe({
       next: () => this.router.navigateByUrl("/members"),
-      error: err => this.toastr.error(err.error),
       complete: ()=>{
         //turn off loader
       }

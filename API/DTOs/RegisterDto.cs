@@ -8,6 +8,7 @@ namespace API.DTOs
         [Required]           //APIController attribute will make sure your data pass these validations
         public string Username { get; set; }
         [Required]
+        [StringLength(8, MinimumLength = 4)]
         public string Password { get; set; }
     }
 }
