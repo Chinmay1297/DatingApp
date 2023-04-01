@@ -7,6 +7,7 @@ using API.Data;
 using API.DTOs;
 using API.Entities;
 using API.Extensions;
+using API.Helpers;
 using API.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -35,13 +36,16 @@ namespace API.Controllers
 
         //[AllowAnonymous] //dont use this at controller level, cuz then you cant override it at api endpoint level and use authorize there
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AppUser>>> GetUsers() //ActionResult gives us the ability to return http responses (200 OK, bat request, etc)
+        public async Task<ActionResult<PagedList<AppUser>>> GetUsers([FromQuery]UserParams userParams) //ActionResult gives us the ability to return http responses (200 OK, bat request, etc)
         {
             // var users = await _userRepository.GetUsersAsync();
             // var usersToReturn = _mapper.Map<IEnumerable<MemberDto>>(users);
             // return Ok(usersToReturn);
 
-            return Ok(await _userRepository.GetMembersAsync());
+            var users = await _userRepository.GetMembersAsync(userParams);
+            Response.AddPaginationHeader(new PaginationHeader(users.CurrentPage, users.PageSize,
+                users.TotalCount, users.TotalPages));
+            return Ok(users);
         }
 
         // [HttpGet("{id}")]
