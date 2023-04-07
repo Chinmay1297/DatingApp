@@ -5,6 +5,7 @@ using API.Helpers;
 using API.Interfaces;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
 namespace API.Controllers
 {
@@ -67,6 +68,27 @@ namespace API.Controllers
         {
             var currentUserName = User.GetUsername();
             return Ok(await _messageRepository.GetMessageThread(currentUserName, username));
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Deletemessage(int id)
+        {
+            var username = User.GetUsername();
+
+            var message = await _messageRepository.Getmessage(id);
+
+            if(message.SenderUsername != username && message.RecipientUsername != username) return Unauthorized();
+
+            if(message.SenderUsername == username) message.SenderDeleted = true;
+            if(message.RecipientUsername == username) message.RecipientDeleted = true;
+
+            if(message.SenderDeleted && message.RecipientDeleted) 
+            {
+                _messageRepository.DeleteMessage(message);
+            }
+
+            if(await _messageRepository.SaveAllAsync()) return Ok();
+            return BadRequest("Problem deleting the message");
         }
     }
 }
