@@ -20,7 +20,11 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.UseMiddleware<ExceptionMiddleware>();
-app.UseCors(builder => builder.AllowAnyHeader().AllowAnyMethod().WithOrigins("https://localhost:4200"));
+app.UseCors(builder => builder
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .AllowCredentials()
+    .WithOrigins("https://localhost:4200"));
 
 //sequence matters here! it comes after CORS and before Mapcontrollers   --- authentication 1st, authorization 2nd
 app.UseAuthentication();   //asks does the request has a valid token
@@ -29,6 +33,7 @@ app.UseAuthorization();    //if yes what are you allowed to do
 app.MapControllers();              //Middlewares from and above this line till configure http comment
 
 app.MapHub<PresenceHub>("hubs/presence");
+app.MapHub<MessageHub>("hubs/message");
 
 
 using var scope = app.Services.CreateScope();
