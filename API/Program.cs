@@ -2,6 +2,7 @@ using API.Data;
 using API.Entities;
 using API.Extensions;
 using API.Middleware;
+using API.SignalR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -27,6 +28,7 @@ app.UseAuthorization();    //if yes what are you allowed to do
 
 app.MapControllers();              //Middlewares from and above this line till configure http comment
 
+app.MapHub<PresenceHub>("hubs/presence");
 
 
 using var scope = app.Services.CreateScope();
