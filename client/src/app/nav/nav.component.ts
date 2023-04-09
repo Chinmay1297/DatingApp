@@ -23,18 +23,13 @@ export class NavComponent implements OnInit {
    //this.currentUser$ = this.accountService.currentUser$;
   }
 
-  // getCurrentUser()
-  // {
-  //   this.accountService.currentUser$.subscribe({
-  //     next: user => this.loggedIn = !!user,             // !!makes the expression boolean same as if user = true else false
-  //     error: err=> console.log(err)
-  //   })
-  // }
-
   login()
   {
     this.accountService.login(this.model).subscribe({
-      next: () => this.router.navigateByUrl("/members"),
+      next: () => {
+        this.router.navigateByUrl("/members");
+        this.model = {};
+      },
       complete: ()=>{
         //turn off loader
       }
