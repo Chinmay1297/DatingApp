@@ -23,6 +23,6 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: ${{ github.workspace }}/:API
+          context: ${{ github.workspace }}/DatingApp/API
           push: true
           tags: chinmay1297/datingapp:latest
