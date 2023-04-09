@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, map } from 'rxjs';
 import { User } from '../_models/user';
-import { environment } from 'src/environments/environment.development';
 import { PresenceService } from './presence.service';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +16,14 @@ export class AccountService {
   constructor(private http: HttpClient, private presenceService: PresenceService) { }
 
   login(model: any){
+    if(environment.production)
+    {
+      console.log("Environment: production");
+    }
+    else{
+      console.log("Environment: development");
+    }
+    
     return this.http.post<User>(this.baseUrl + 'account/login', model)      //<User> defines what typ of obj we'll get from http request
     .pipe(
       map((response: User)=> {

@@ -16,10 +16,11 @@ namespace API.Extensions
 
             services.AddScoped<ITokenService, TokenService>();   //AddScope ensures disposal of service instance after the controller that uses this service is disposed
 
-            services.AddDbContext<DataContext>(opt => 
-            {
-                opt.UseSqlite(config.GetConnectionString("DefaultConnection"));
-            });
+            // services.AddDbContext<DataContext>(opt => 
+            // {
+            //     //opt.UseSqlite(config.GetConnectionString("DefaultConnection"));
+            //     opt.UseNpgsql(config.GetConnectionString("DefaultConnection"));
+            // });
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 

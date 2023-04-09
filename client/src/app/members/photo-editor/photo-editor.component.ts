@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Member } from '../../_models/member';
-import { environment } from '../../../environments/environment.development';
+import { environment } from 'src/environments/environment';
 import { FileUploader } from 'ng2-file-upload';
 import { User } from 'src/app/_models/user';
 import { AccountService } from '../../_services/account.service';
