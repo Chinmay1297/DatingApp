@@ -3,7 +3,7 @@ WORKDIR /app
 EXPOSE 8080
 
 # copy csproj and restore as distinct layers
-COPY API.csproj .
+COPY *.csproj ./
 RUN dotnet restore
 
 # copy everything else and build
