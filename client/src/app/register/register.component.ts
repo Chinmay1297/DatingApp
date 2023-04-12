@@ -14,6 +14,8 @@ export class RegisterComponent implements OnInit {
   registerForm : FormGroup = new FormGroup({});
   maxDate: Date = new Date();
   validationErrors: string[] | undefined;
+  passwordStrength: string | undefined;
+  passwordError: string = '';
 
   constructor(
     private accountService: AccountService,
@@ -35,7 +37,8 @@ export class RegisterComponent implements OnInit {
       dateOfBirth: ['', Validators.required],
       city: ['', Validators.required],
       country: ['', Validators.required],
-      password: ['',[Validators.required, Validators.minLength(7)]],
+      password: ['',[Validators.required, Validators.minLength(7), this.containsNumber(), 
+        this.containsLowercase(), this.containsUppercase(), this.containsSpecialCharacter()]],
       confirmPassword: ['',[Validators.required, this.matchValues('password')]],
     });
 
@@ -47,6 +50,36 @@ export class RegisterComponent implements OnInit {
   matchValues(matchTo: string) : ValidatorFn{
     return (control: AbstractControl) => {
       return control.value === control.parent?.get(matchTo)?.value ? null : {notMatching: true}
+    }
+  }
+
+  containsNumber()
+  {
+    return (control: AbstractControl) => {
+      return /\d/.test(control.value) ? null : {doesntContainNumber: true}
+    }
+  }
+
+  containsLowercase()
+  {
+    return (control: AbstractControl) => {
+      return /[a-z]/.test(control.value) ? null : {doesntContainLowercase: true}
+    }
+  }
+
+  
+
+  containsUppercase()
+  {
+    return (control: AbstractControl) => {
+      return /[A-Z]/.test(control.value) ? null : {doesntContainUppercase: true}
+    }
+  }
+
+  containsSpecialCharacter()
+  {
+    return (control: AbstractControl) => {
+      return /[-+_!@#$%^&*.,?]/.test(control.value) ? null : {doesntContainSpecialCharacter: true}
     }
   }
 

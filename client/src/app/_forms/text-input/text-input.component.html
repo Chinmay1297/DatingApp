@@ -14,4 +14,16 @@
     <div class="invalid-feedback" *ngIf="control.errors?.['notMatching']">
         Passwords donot match
     </div>
+    <div class="invalid-feedback" *ngIf="control.errors?.['doesntContainNumber']">
+         Must contain a number
+    </div>
+    <div class="invalid-feedback" *ngIf="control.errors?.['doesntContainLowercase']">
+        Must contain a lowercase letter
+    </div>
+    <div class="invalid-feedback" *ngIf="control.errors?.['doesntContainUppercase']">
+        Must contain an uppercase letter
+    </div>
+    <div class="invalid-feedback" *ngIf="control.errors?.['doesntContainSpecialCharacter']">
+        Must contain a special character
+    </div>
 </div>
