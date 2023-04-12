@@ -32,7 +32,7 @@ export class RegisterComponent implements OnInit {
   {
     this.registerForm = this.fb.group({
       gender: ['male'],
-      username: ['', Validators.required],
+      username: ['', [Validators.required, this.isValidUsername()]],
       knownAs: ['', Validators.required],
       dateOfBirth: ['', Validators.required],
       city: ['', Validators.required],
@@ -45,6 +45,22 @@ export class RegisterComponent implements OnInit {
     this.registerForm.controls['password'].valueChanges.subscribe({
       next: ()=> this.registerForm.controls['confirmPassword'].updateValueAndValidity()
     })
+  }
+
+  isValidUsername()
+  {
+    return (control: AbstractControl) => {
+      if(control.value.includes(' '))
+      {
+        return {invalidUsername: true}
+      }
+
+      if(/[-+_!@#$%^&*.,?]/.test(control.value))
+      {
+        return {invalidUsername: true}
+      }
+      return null;
+    }
   }
 
   matchValues(matchTo: string) : ValidatorFn{
