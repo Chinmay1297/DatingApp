@@ -16,29 +16,36 @@ builder.Services.AddApplicationServices(builder.Configuration);                /
 
 builder.Services.AddIdentityServices(builder.Configuration);                   //Similarly IdentityServiceExtension class's function is used here
 
+
+//override values from appsettings.json with any matching environment variables
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables();
+
 //---------------------------------Reading DATABASE_URL from env variable--------------------------
 var connString = "";
-if (builder.Environment.IsDevelopment())
-    connString = builder.Configuration.GetConnectionString("DefaultConnection");
-else
-{
-    // Use connection string provided at runtime by Flyio.
-    var connUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+// if (builder.Environment.IsDevelopment())
+//if (true)
+    connString = builder.Configuration.GetConnectionString("DefaultConnection"); //connecting to postgre from other container, make sure container name is correct in connection string
+//else
+//{
+//    // Use connection string provided at runtime by Flyio.
+//    var connUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
-    // Parse connection URL to connection string for Npgsql
-    connUrl = connUrl.Replace("postgres://", string.Empty);
-    var pgUserPass = connUrl.Split("@")[0];
-    var pgHostPortDb = connUrl.Split("@")[1];
-    var pgHostPort = pgHostPortDb.Split("/")[0];
-    var pgDb = pgHostPortDb.Split("/")[1];
-    var pgUser = pgUserPass.Split(":")[0];
-    var pgPass = pgUserPass.Split(":")[1];
-    var pgHost = pgHostPort.Split(":")[0];
-    var pgPort = pgHostPort.Split(":")[1];
-    var updatedHost = pgHost.Replace("flycast", "internal");
+//    // Parse connection URL to connection string for Npgsql
+//    connUrl = connUrl.Replace("postgres://", string.Empty);
+//    var pgUserPass = connUrl.Split("@")[0];
+//    var pgHostPortDb = connUrl.Split("@")[1];
+//    var pgHostPort = pgHostPortDb.Split("/")[0];
+//    var pgDb = pgHostPortDb.Split("/")[1];
+//    var pgUser = pgUserPass.Split(":")[0];
+//    var pgPass = pgUserPass.Split(":")[1];
+//    var pgHost = pgHostPort.Split(":")[0];
+//    var pgPort = pgHostPort.Split(":")[1];
+//    var updatedHost = pgHost.Replace("flycast", "internal");
 
-    connString = $"Server={updatedHost};Port={pgPort};User Id={pgUser};Password={pgPass};Database={pgDb};";
-}
+//    connString = $"Server={updatedHost};Port={pgPort};User Id={pgUser};Password={pgPass};Database={pgDb};";
+//}
 builder.Services.AddDbContext<DataContext>(opt =>
 {
     opt.UseNpgsql(connString);
