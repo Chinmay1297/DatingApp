@@ -1,0 +1,109 @@
+Run Jenkins image on docker(Powershell):
+docker run -d --name jenkins-docker -u root `
+  -p 8080:8080 -p 50000:50000 `
+  -v jenkins_home:/var/jenkins_home `
+  -v /var/run/docker.sock:/var/run/docker.sock `
+  jenkins/jenkins:lts
+
+To enter the Jenkins container shell:
+docker exec -it jenkins-docker bash
+
+Password for Jenkins:
+docker exec jenkins-docker cat /var/jenkins_home/secrets/initialAdminPassword 
+
+
+Inside Jenkins container bash:(ICU package required to run dotnet restore)
+apt-get update && apt-get install -y libicu-dev
+
+Install .NET SDK Inside Jenkins Container:
+apt-get update && apt-get install -y wget apt-transport-https
+
+wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+chmod +x dotnet-install.sh
+./dotnet-install.sh --version 8.0.100
+
+Add to PATH Inside jenkins Container Shell:
+export DOTNET_ROOT=/root/.dotnet
+export PATH=$PATH:/root/.dotnet
+
+
+Inside Jenkins bash install docker cli:
+apt-get update && apt-get install -y docker.io
+
+
+Add Credentials in Jenkins UI:
+ID: dockerhub-creds
+Username: chinmay1297
+Password: docker access token
+
+Install Plugins inside Jenkins UI:
+	- Docker Pipeline
+	- Pipeline Stage View
+
+
+Jenkins Script:
+pipeline {
+  agent any
+
+  environment {
+    DOTNET_ROOT = '/root/.dotnet'
+    PATH = "/root/.dotnet:${env.PATH}"
+    DOCKERHUB = credentials('dockerhub-creds') // Add this in Jenkins UI
+    IMAGE = 'chinmay1297/datequest' // Replace with your actual repo name
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        git branch: 'datequest-ci-cd', url: 'https://github.com/Chinmay1297/DatingApp.git'
+      }
+    }
+
+    stage('Restore') {
+      steps {
+        dir('API') {
+          sh 'dotnet restore'
+        }
+      }
+    }
+
+    stage('Build') {
+      steps {
+        dir('API') {
+          sh 'dotnet build --configuration Release'
+        }
+      }
+    }
+
+    stage('Publish') {
+      steps {
+        dir('API') {
+          sh 'dotnet publish --configuration Release --output out'
+        }
+      }
+    }
+
+    stage('Docker Build & Push') {
+      steps {
+        script {
+          dir('API') {
+            docker.withRegistry('', 'dockerhub-creds') {
+              def img = docker.build("${IMAGE}:${env.BUILD_NUMBER}", '.')
+              img.push()
+              img.push('latest')
+            }
+          }
+        }
+      }
+    }
+  }
+
+  post {
+    success {
+      echo '✅ Build, publish, and Docker push completed.'
+    }
+    failure {
+      echo '❌ Something went wrong. Check the logs.'
+    }
+  }
+}
