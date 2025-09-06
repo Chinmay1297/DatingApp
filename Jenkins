@@ -8,6 +8,10 @@ pipeline {
     IMAGE = 'chinmay1297/datequest' // Replace with your actual repo name
   }
 
+  tools {
+    nodejs 'Node_16' // Ensure this is configured in Jenkins UI
+  }
+
   stages {
     stage('Checkout') {
       steps {
@@ -15,7 +19,7 @@ pipeline {
       }
     }
 
-    stage('Restore') {
+    stage('Restore .NET') {
       steps {
         dir('API') {
           sh 'dotnet restore'
@@ -23,7 +27,7 @@ pipeline {
       }
     }
 
-    stage('Build') {
+    stage('Build .NET') {
       steps {
         dir('API') {
           sh 'dotnet build --configuration Release'
@@ -31,7 +35,7 @@ pipeline {
       }
     }
 
-    stage('Publish') {
+    stage('Publish .NET') {
       steps {
         dir('API') {
           sh 'dotnet publish --configuration Release --output out'
@@ -39,24 +43,33 @@ pipeline {
       }
     }
 
-    stage('Docker Build & Push') {
+    stage('Build Angular') {
       steps {
-        script {
-          dir('API') {
-            docker.withRegistry('', 'dockerhub-creds') {
-              def img = docker.build("${IMAGE}:${env.BUILD_NUMBER}", '.')
-              img.push()
-              img.push('latest')
-            }
-          }
+        dir('client') {
+          sh 'npm install'
+          sh 'npm run build -- --configuration=production'
         }
       }
     }
+
+    // stage('Docker Build & Push') {
+    //   steps {
+    //     script {
+    //       dir('API') {
+    //         docker.withRegistry('', 'dockerhub-creds') {
+    //           def img = docker.build("${IMAGE}:${env.BUILD_NUMBER}", '.')
+    //           img.push()
+    //           img.push('latest')
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
   }
 
   post {
     success {
-      echo '✅ Build, publish, and Docker push completed.'
+      echo '✅ Build pipeline completed successfully.'
     }
     failure {
       echo '❌ Something went wrong. Check the logs.'
