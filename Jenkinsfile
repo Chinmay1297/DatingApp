@@ -46,7 +46,7 @@ pipeline {
     stage('Build Angular') {
       steps {
         dir('client') {
-          sh 'npm install'
+          sh 'npm install --legacy-peer-deps'
           sh 'npm run build -- --configuration=production'
         }
       }
