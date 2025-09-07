@@ -57,13 +57,15 @@ pipeline {
 
     stage('Upload to Azure Blob Storage') {
       steps {
-        sh """
-          az storage blob upload-batch \
-            --account-name $AZURE_STORAGE_ACCOUNT \
-            --account-key $AZURE_STORAGE_KEY \
-            --destination \$web \
-            --source $BUILD_DIR
-        """
+        withCredentials([string(credentialsId: 'AZURE_STORAGE_KEY', variable: 'AZURE_KEY')]) {
+          sh '''
+            az storage blob upload-batch \
+              --account-name datequeststorage \
+              --account-key "$AZURE_KEY" \
+              --destination $web \
+              --source client/dist/client
+          '''
+        }
       }
     }
 
