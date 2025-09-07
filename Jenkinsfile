@@ -4,8 +4,11 @@ pipeline {
   environment {
     DOTNET_ROOT = '/root/.dotnet'
     PATH = "/root/.dotnet:${env.PATH}"
-    DOCKERHUB = credentials('dockerhub-creds') // Add this in Jenkins UI
-    IMAGE = 'chinmay1297/datequest' // Replace with your actual repo name
+    DOCKERHUB = credentials('dockerhub-creds') // DockerHub creds
+    IMAGE = 'chinmay1297/datequest' // Docker image name
+    AZURE_STORAGE_ACCOUNT = 'datequeststorage' // Your storage account name
+    AZURE_STORAGE_KEY = credentials('AZURE_STORAGE_KEY') // Add this in Jenkins UI as secret text
+    BUILD_DIR = 'client/dist/client' // Angular build output
   }
 
   tools {
@@ -52,6 +55,19 @@ pipeline {
       }
     }
 
+    stage('Upload to Azure Blob Storage') {
+      steps {
+        sh """
+          az storage blob upload-batch \
+            --account-name $AZURE_STORAGE_ACCOUNT \
+            --account-key $AZURE_STORAGE_KEY \
+            --destination \$web \
+            --source $BUILD_DIR
+        """
+      }
+    }
+
+    // Optional Docker stage (commented out)
     // stage('Docker Build & Push') {
     //   steps {
     //     script {
@@ -69,7 +85,7 @@ pipeline {
 
   post {
     success {
-      echo '✅ Build pipeline completed successfully.'
+      echo '✅ Build and deployment completed successfully.'
     }
     failure {
       echo '❌ Something went wrong. Check the logs.'
