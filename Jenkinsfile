@@ -59,17 +59,18 @@ pipeline {
       steps {
         withCredentials([string(credentialsId: 'AZURE_STORAGE_KEY', variable: 'AZURE_KEY')]) {
           sh '''
-            CONTAINER_NAME="$web"
+            CONTAINER_NAME="\\$web"
             az storage blob upload-batch \
               --account-name datequeststorage \
               --account-key "$AZURE_KEY" \
               --destination "$CONTAINER_NAME" \
-              --source client/dist/client
+              --source client/dist/client \
+              --overwrite true
           '''
         }
       }
     }
-    
+
     // Optional Docker stage (commented out)
     // stage('Docker Build & Push') {
     //   steps {
