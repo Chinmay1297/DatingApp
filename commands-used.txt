@@ -1,3 +1,5 @@
+How to Setup Jenkins CICD
+
 Run Jenkins image on docker(Powershell):
 docker run -d --name jenkins-docker -u root `
   -p 8080:8080 -p 50000:50000 `
@@ -22,12 +24,12 @@ wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
 chmod +x dotnet-install.sh
 ./dotnet-install.sh --version 8.0.100
 
-Add to PATH Inside jenkins Container Shell:
+Add to PATH Inside jenkins Container Shell (only then dotnet will be recognized):
 export DOTNET_ROOT=/root/.dotnet
 export PATH=$PATH:/root/.dotnet
 
 
-Inside Jenkins bash install docker cli:
+Inside Jenkins bash install DOCKER CLI:
 apt-get update && apt-get install -y docker.io
 
 
@@ -41,7 +43,7 @@ Install Plugins inside Jenkins UI:
 	- Pipeline Stage View
 
 
-Jenkins Script:
+Jenkins Script
 pipeline {
   agent any
 
@@ -107,3 +109,34 @@ pipeline {
     }
   }
 }
+
+
+
+To install azure CLI inside Jenkins container:
+curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
+Jenkins stage for publishing angular build to azure storage account:
+stage('Upload to Azure Blob Storage') {
+      steps {
+        withCredentials([string(credentialsId: 'AZURE_STORAGE_KEY', variable: 'AZURE_KEY')]) {
+          sh '''
+            CONTAINER_NAME="\\$web"
+            az storage blob upload-batch \
+              --account-name datequeststorage \
+              --account-key "$AZURE_KEY" \
+              --destination "$CONTAINER_NAME" \
+              --source client/dist/client \
+              --overwrite true
+          '''
+        }
+      }
+    }
+
+NOTE:
+	- we used \\$web otherwise it would assume it as a groovy variable
+	- Make sure to add AZURE_STORAGE_KEY as secret with key from storage account as a secret text through Jenkins UI
+
+
+CAUTION:
+To remove all unused containers, volumes, images, and networks:
+docker system prune --volumes
