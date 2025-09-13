@@ -36,7 +36,7 @@ pipeline {
         withSonarQubeEnv('LocalSonarQube') {
           withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_AUTH')]) {
             dir('API') {
-              sh 'dotnet sonarscanner begin /k:"datequest" /d:sonar.host.url="http://localhost:9000" /d:sonar.login="$SONAR_AUTH"'
+              sh 'dotnet sonarscanner begin /k:"datequest" /d:sonar.host.url="http://sonarqube:9000" /d:sonar.login="$SONAR_AUTH"'
               sh 'dotnet build --configuration Release'
               sh 'dotnet sonarscanner end /d:sonar.login="$SONAR_AUTH"'
             }
