@@ -3,7 +3,7 @@ pipeline {
 
   environment {
     DOTNET_ROOT = '/root/.dotnet'
-    PATH = "/root/.dotnet/tools:${env.PATH}"
+    PATH = "/root/.dotnet:/root/.dotnet/tools:${env.PATH}"
     DOCKERHUB = credentials('dockerhub-creds') // DockerHub creds
     IMAGE = 'chinmay1297/datequest' // Docker image name
     AZURE_STORAGE_ACCOUNT = 'datequeststorage' // Your storage account name
