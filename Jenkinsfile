@@ -3,7 +3,7 @@ pipeline {
 
   environment {
     DOTNET_ROOT = '/root/.dotnet'
-    PATH = "/root/.dotnet:${env.PATH}"
+    PATH = "/root/.dotnet/tools:${env.PATH}"
     DOCKERHUB = credentials('dockerhub-creds') // DockerHub creds
     IMAGE = 'chinmay1297/datequest' // Docker image name
     AZURE_STORAGE_ACCOUNT = 'datequeststorage' // Your storage account name
@@ -30,13 +30,25 @@ pipeline {
       }
     }
 
-    stage('Build .NET') {
+    stage('SonarQube Analysis') {
       steps {
-        dir('API') {
-          sh 'dotnet build --configuration Release'
+        withSonarQubeEnv('LocalSonarQube') {
+          dir('API') {
+            sh 'dotnet sonarscanner begin /k:"datequest" /d:sonar.host.url="http://localhost:9000" /d:sonar.login="${SONAR_TOKEN}"'
+            sh 'dotnet build --configuration Release'
+            sh 'dotnet sonarscanner end /d:sonar.login="${SONAR_TOKEN}"'
+          }
         }
       }
     }
+
+    // stage('Build .NET') {
+    //   steps {
+    //     dir('API') {
+    //       sh 'dotnet build --configuration Release'
+    //     }
+    //   }
+    // }
 
     stage('Publish .NET') {
       steps {
@@ -46,30 +58,32 @@ pipeline {
       }
     }
 
-    stage('Build Angular') {
-      steps {
-        dir('client') {
-          sh 'npm install --legacy-peer-deps'
-          sh 'npm run build -- --configuration=production'
-        }
-      }
-    }
+    // Uploading to Azure Blob Storage (commented out as subscription is expired)
+    // stage('Build Angular') {
+    //   steps {
+    //     dir('client') {
+    //       sh 'npm install --legacy-peer-deps'
+    //       sh 'npm run build -- --configuration=production'
+    //     }
+    //   }
+    // }
 
-    stage('Upload to Azure Blob Storage') {
-      steps {
-        withCredentials([string(credentialsId: 'AZURE_STORAGE_KEY', variable: 'AZURE_KEY')]) {
-          sh '''
-            CONTAINER_NAME="\\$web"
-            az storage blob upload-batch \
-              --account-name datequeststorage \
-              --account-key "$AZURE_KEY" \
-              --destination "$CONTAINER_NAME" \
-              --source client/dist/client \
-              --overwrite true
-          '''
-        }
-      }
-    }
+    
+    // stage('Upload to Azure Blob Storage') {
+    //   steps {
+    //     withCredentials([string(credentialsId: 'AZURE_STORAGE_KEY', variable: 'AZURE_KEY')]) {
+    //       sh '''
+    //         CONTAINER_NAME="\\$web"
+    //         az storage blob upload-batch \
+    //           --account-name datequeststorage \
+    //           --account-key "$AZURE_KEY" \
+    //           --destination "$CONTAINER_NAME" \
+    //           --source client/dist/client \
+    //           --overwrite true
+    //       '''
+    //     }
+    //   }
+    // }
 
     // Optional Docker stage (commented out)
     // stage('Docker Build & Push') {
