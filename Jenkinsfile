@@ -9,6 +9,7 @@ pipeline {
     AZURE_STORAGE_ACCOUNT = 'datequeststorage' // Your storage account name
     AZURE_STORAGE_KEY = credentials('AZURE_STORAGE_KEY') // Add this in Jenkins UI as secret text
     BUILD_DIR = 'client/dist/client' // Angular build output
+    SONAR_TOKEN = credentials('SONAR_TOKEN') // SonarQube token injected securely
   }
 
   tools {
@@ -33,10 +34,12 @@ pipeline {
     stage('SonarQube Analysis') {
       steps {
         withSonarQubeEnv('LocalSonarQube') {
-          dir('API') {
-            sh 'dotnet sonarscanner begin /k:"datequest" /d:sonar.host.url="http://localhost:9000" /d:sonar.login="${SONAR_TOKEN}"'
-            sh 'dotnet build --configuration Release'
-            sh 'dotnet sonarscanner end /d:sonar.login="${SONAR_TOKEN}"'
+          withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_AUTH')]) {
+            dir('API') {
+              sh 'dotnet sonarscanner begin /k:"datequest" /d:sonar.host.url="http://localhost:9000" /d:sonar.login="$SONAR_AUTH"'
+              sh 'dotnet build --configuration Release'
+              sh 'dotnet sonarscanner end /d:sonar.login="$SONAR_AUTH"'
+            }
           }
         }
       }
@@ -68,7 +71,6 @@ pipeline {
     //   }
     // }
 
-    
     // stage('Upload to Azure Blob Storage') {
     //   steps {
     //     withCredentials([string(credentialsId: 'AZURE_STORAGE_KEY', variable: 'AZURE_KEY')]) {
